@@ -1,3 +1,3 @@
-import * as Effect from "effect/Effect"
+import { Effect } from "effect"
 
 Effect.runPromise(Effect.log("Hello, World!"))
