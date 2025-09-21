@@ -28,7 +28,7 @@ function divideEff(a: number, b: number) {
   return success
 }
 
-Effect.runPromise(divideEff(10, 2))
+Effect.runSync(divideEff(10, 2))
 
 //                                ┌─── 0.123456...
 //                                ▼
@@ -41,7 +41,7 @@ function drawRandom() {
 //      ┌─── Effect.Effect<number, never, never>
 //      ▼
 const program = drawRandom()
-Effect.runPromise(program)
+Effect.runSync(program)
 
 //      ┌─── Effect.Effect<never, never, never>
 //      ▼
