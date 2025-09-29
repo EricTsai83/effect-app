@@ -1,55 +1,55 @@
 import { Console, Effect } from "effect"
 
 {
-  // const mustBeMinLen = (s: string, min: number) => s.length >= min ? Effect.succeed(s) : Effect.fail(`length < ${min}`)
+  const mustBeMinLen = (s: string, min: number) => s.length >= min ? Effect.succeed(s) : Effect.fail(`length < ${min}`)
 
-  // const mustInclude = (s: string, token: string) =>
-  //   s.includes(token) ? Effect.succeed(s) : Effect.fail(`missing "${token}"`)
+  const mustInclude = (s: string, token: string) =>
+    s.includes(token) ? Effect.succeed(s) : Effect.fail(`missing "${token}"`)
 
-  // const program = Effect.zip(
-  //   mustBeMinLen("ab", 3), // 失敗
-  //   mustInclude("foobar", "@") // 不會執行（因為左側先失敗
-  // )
+  const program = Effect.zip(
+    mustBeMinLen("ab", 3), // 失敗
+    mustInclude("foobar", "@") // 不會執行（因為左側先失敗
+  )
 
-  // Effect.runSync(
-  //   Effect.match(program, {
-  //     onSuccess: ([a, b]) => console.log("OK:", a, b),
-  //     onFailure: (err) => console.log("ERROR:", err)
-  //   })
-  // )
+  Effect.runSync(
+    Effect.match(program, {
+      onSuccess: ([a, b]) => console.log("OK:", a, b),
+      onFailure: (err) => console.log("ERROR:", err)
+    })
+  )
 }
 
 {
-  // const mustBePositive = (n: number, index: number) =>
-  //   n > 0 ? Effect.succeed(n) : Effect.fail(`not positive: ${n} at index ${index}`)
+  const mustBePositive = (n: number, index: number) =>
+    n > 0 ? Effect.succeed(n) : Effect.fail(`not positive: ${n} at index ${index}`)
 
-  // const numbers = [2, -1, -2, 3]
+  const numbers = [2, -1, -2, 3]
 
-  // const program = Effect.forEach(numbers, (n, index) => mustBePositive(n, index))
+  const program = Effect.forEach(numbers, (n, index) => mustBePositive(n, index))
 
-  // Effect.runSync(
-  //   Effect.match(program, {
-  //     onSuccess: (values) => console.log("OK:", values),
-  //     onFailure: (err) => console.log("ERROR:", err)
-  //   })
-  // )
+  Effect.runSync(
+    Effect.match(program, {
+      onSuccess: (values) => console.log("OK:", values),
+      onFailure: (err) => console.log("ERROR:", err)
+    })
+  )
 }
 
 {
-  // const getData = (id: number) => id > 1 ? Effect.fail(`Data ${id}`) : Effect.succeed(`Data ${id}`)
+  const getData = (id: number) => id > 1 ? Effect.fail(`Data ${id}`) : Effect.succeed(`Data ${id}`)
 
-  // const program = Effect.all([
-  //   getData(1),
-  //   getData(2),
-  //   getData(3)
-  // ])
+  const program = Effect.all([
+    getData(1),
+    getData(2),
+    getData(3)
+  ])
 
-  // Effect.runSync(
-  //   Effect.match(program, {
-  //     onSuccess: (results) => console.log("OK:", results),
-  //     onFailure: (err) => console.log("ERROR:", err)
-  //   })
-  // )
+  Effect.runSync(
+    Effect.match(program, {
+      onSuccess: (results) => console.log("OK:", results),
+      onFailure: (err) => console.log("ERROR:", err)
+    })
+  )
 }
 
 {
@@ -81,43 +81,43 @@ import { Console, Effect } from "effect"
 }
 
 {
-  // //      ┌─── Effect<number, string[], never>
-  // //      ▼
-  // const program = Effect.validateAll([1, 2, 3, 4, 5], (n) => {
-  //   if (n < 4) {
-  //     return Console.log(`item ${n}`).pipe(Effect.as(n))
-  //   } else {
-  //     return Effect.fail(`${n} is not less that 4`)
-  //   }
-  // })
+  //      ┌─── Effect<number, string[], never>
+  //      ▼
+  const program = Effect.validateAll([1, 2, 3, 4, 5], (n) => {
+    if (n < 4) {
+      return Console.log(`item ${n}`).pipe(Effect.as(n))
+    } else {
+      return Effect.fail(`${n} is not less that 4`)
+    }
+  })
 
-  // // 執行 Effect 並處理結果
-  // Effect.runPromiseExit(program).then(console.log)
+  // 執行 Effect 並處理結果
+  Effect.runPromiseExit(program).then(console.log)
 }
 
 // 加在這下方
 {
-  // //      ┌─── Effect<[string[], number[]], never, never>
-  // //      ▼
-  // const program = Effect.partition([0, 1, 2, 3, 4], (n) => {
-  //   if (n % 2 === 0) {
-  //     return Effect.succeed(n)
-  //   } else {
-  //     return Effect.fail(`${n} is not even`)
-  //   }
-  // })
+  //      ┌─── Effect<[string[], number[]], never, never>
+  //      ▼
+  const program = Effect.partition([0, 1, 2, 3, 4], (n) => {
+    if (n % 2 === 0) {
+      return Effect.succeed(n)
+    } else {
+      return Effect.fail(`${n} is not even`)
+    }
+  })
 
-  // Effect.runPromise(program).then(console.log, console.error)
+  Effect.runPromise(program).then(console.log, console.error)
 }
 
 {
-  // const program = Effect.validateFirst([1, 2, 3, 4, 5], (n) => {
-  //   if (n < 4) {
-  //     return Effect.fail(`${n} is not less that 4`)
-  //   } else {
-  //     return Console.log(`item ${n}`).pipe(Effect.as(n))
-  //   }
-  // })
+  const program = Effect.validateFirst([1, 2, 3, 4, 5], (n) => {
+    if (n < 4) {
+      return Effect.fail(`${n} is not less that 4`)
+    } else {
+      return Console.log(`item ${n}`).pipe(Effect.as(n))
+    }
+  })
 
-  // Effect.runPromise(program).then(console.log, console.error)
+  Effect.runPromise(program).then(console.log, console.error)
 }
