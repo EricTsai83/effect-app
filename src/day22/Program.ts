@@ -1,40 +1,4 @@
 import { Context, Effect, Layer } from "effect"
-import * as assert from "node:assert"
-
-{
-  // Config 與 Logger：僅作為示意
-  class Config extends Context.Tag("Config")<Config, object>() {}
-  class Logger extends Context.Tag("Logger")<Logger, object>() {}
-
-  // ❌ 錯誤示範：把依賴暴露在介面中
-  class Database extends Context.Tag("Database")<
-    Database,
-    {
-      readonly query: (
-        sql: string
-      ) => Effect.Effect<unknown, never, Config | Logger>
-    }
-  >() {}
-
-  // 測試替身 Test Double（假資料庫）
-  const DatabaseTest = Database.of({
-    query: (_sql) => Effect.succeed([]) // 假裝查詢回傳 []
-  })
-
-  const test = Effect.gen(function*() {
-    const database = yield* Database
-    const result = yield* database.query("SELECT * FROM users")
-    assert.deepStrictEqual(result, [])
-  })
-
-  //      ┌── Effect<void, never, Config | Logger>
-  //      ▼
-  const incompleteTestSetup = test.pipe(
-    Effect.provideService(Database, DatabaseTest)
-  )
-
-  Effect.runSync(incompleteTestSetup)
-}
 
 // 服務定義：提供讀取設定的方法
 class Config extends Context.Tag("Config")<
@@ -49,7 +13,7 @@ class Config extends Context.Tag("Config")<
 
 //        ┌─── Layer<Config, never, never>
 //        ▼
-const _ConfigLive = Layer.succeed(Config, {
+const ConfigLive = Layer.succeed(Config, {
   getConfig: Effect.succeed({
     logLevel: "INFO",
     connection: "mysql://username:password@hostname:3306/database_name"
@@ -59,13 +23,13 @@ const _ConfigLive = Layer.succeed(Config, {
 class Logger extends Context.Tag("Logger")<
   Logger,
   {
-    readonly log: (message: string) => Effect.Effect<void> 
+    readonly log: (message: string) => Effect.Effect<void>
   }
 >() {}
 
 //        ┌─── Layer<Logger, never, Config>
 //        ▼
-const _LoggerLive = Layer.effect(
+const LoggerLive = Layer.effect(
   Logger,
   Effect.gen(function*() {
     const config = yield* Config
@@ -87,7 +51,7 @@ class Database extends Context.Tag("Database")<
 
 //         ┌─── Layer<Database, never, Config | Logger>
 //         ▼
-const _DatabaseLive = Layer.effect(
+const DatabaseLive = Layer.effect(
   Database,
   Effect.gen(function*() {
     const config = yield* Config
@@ -102,3 +66,44 @@ const _DatabaseLive = Layer.effect(
     }
   })
 )
+
+//         ┌─── Layer<Config | Logger, never, Config>
+//         ▼
+const AppConfigLive = Layer.merge(ConfigLive, LoggerLive)
+
+//       ┌─── Layer<Database, never, never>
+//       ▼
+const _MainLive = DatabaseLive.pipe(
+  // 提供 Logger 與（透過 Logger 的需求）Config
+  Layer.provide(AppConfigLive),
+  // 進一步把 Config 的來源補上
+  Layer.provide(ConfigLive)
+)
+
+//       ┌─── Layer<Config | Database, never, never>
+//       ▼
+const MainLive = DatabaseLive.pipe(
+  Layer.provide(AppConfigLive),
+  Layer.provideMerge(ConfigLive)
+)
+
+//      ┌── Effect<unknown, never, Database>
+//      ▼
+const program = Effect.gen(function*() {
+  const database = yield* Database
+  const result = yield* database.query("SELECT * FROM users")
+  return result
+})
+
+//      ┌── Effect<unknown, never, never>
+//      ▼
+const runnable = Effect.provide(program, MainLive)
+
+Effect.runPromise(runnable).then(console.log)
+/*
+輸出:
+[INFO] Executing query: SELECT * FROM users
+{
+  result: 'Results from mysql://username:password@hostname:3306/database_name'
+}
+*/
