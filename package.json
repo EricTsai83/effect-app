@@ -2,7 +2,7 @@
   "name": "@template/basic",
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "pnpm@10.16.0+sha512.8066e7b034217b700a9a4dbb3a005061d641ba130a89915213a10b3ca4919c19c037bec8066afdc559b89635fdb806b16ea673f2468fbb28aabfa13c53e3f769",
+  "packageManager": "pnpm@10.18.0+sha512.e804f889f1cecc40d572db084eec3e4881739f8dec69c0ff10d2d1beff9a4e309383ba27b5b750059d7f4c149535b6cd0d2cb1ed3aeb739239a4284a68f40cfa",
   "license": "MIT",
   "description": "A basic Effect package",
   "repository": {
@@ -28,7 +28,9 @@
     "changeset-publish": "pnpm build && TEST_DIST= pnpm vitest && changeset publish"
   },
   "dependencies": {
-    "effect": "^3.17.7"
+    "@effect/platform": "^0.92.1",
+    "@effect/platform-node": "^0.98.3",
+    "effect": "^3.18.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.8",
