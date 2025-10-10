@@ -59,12 +59,12 @@ const _parsePositive = Option.liftPredicate(isPositive)
     })
   }
 
-  // console.log("rightValue:", describeEither(rightValue))
-  // console.log("leftValue:", describeEither(leftValue))
-  // console.log("mapped:", describeEither(mapped))
-  // console.log("chained:", describeEither(chained))
-  // console.log("normalizedErr:", describeEither(normalizedErr))
-  // console.log("rendered:", rendered)
+  console.log("rightValue:", describeEither(rightValue))
+  console.log("leftValue:", describeEither(leftValue))
+  console.log("mapped:", describeEither(mapped))
+  console.log("chained:", describeEither(chained))
+  console.log("normalizedErr:", describeEither(normalizedErr))
+  console.log("rendered:", rendered)
 }
 
 {
@@ -96,110 +96,110 @@ const _parsePositive = Option.liftPredicate(isPositive)
   //         ▼
   const directFailure = Exit.failCause(Cause.fail("boom"))
 
-  // console.log("renderedOk:", renderedOk)
-  // console.log("renderedErr:", renderedErr)
-  // console.log("directSuccess:", directSuccess)
-  // console.log("directFailure:", directFailure)
+  console.log("renderedOk:", renderedOk)
+  console.log("renderedErr:", renderedErr)
+  console.log("directSuccess:", directSuccess)
+  console.log("directFailure:", directFailure)
 }
 
 {
-  // // 1) 建立帶有不同 Cause 的 Effect
-  // //    - Fail（可預期錯誤，會決定錯誤通道型別 E）
-  // //    - Die（缺陷，不會影響 E，因此 error channel 為 never）
+  // 1) 建立帶有不同 Cause 的 Effect
+  //    - Fail（可預期錯誤，會決定錯誤通道型別 E）
+  //    - Die（缺陷，不會影響 E，因此 error channel 為 never）
 
-  // //      ┌─── Effect<never, never, never>
-  // //      ▼
-  // const asDie = Effect.failCause(Cause.die(new Error("Boom!")))
-  // //      ┌─── Effect<never, string, never>
-  // //      ▼
-  // const asFail = Effect.failCause(Cause.fail("Oops"))
+  //      ┌─── Effect<never, never, never>
+  //      ▼
+  const asDie = Effect.failCause(Cause.die(new Error("Boom!")))
+  //      ┌─── Effect<never, string, never>
+  //      ▼
+  const asFail = Effect.failCause(Cause.fail("Oops"))
 
-  // // 2) 取得 Effect 的 Cause 並做處理（集中觀測）
-  // const program = Effect.fail("error 1")
+  // 2) 取得 Effect 的 Cause 並做處理（集中觀測）
+  const program = Effect.fail("error 1")
 
-  // const allCauseEffect = Effect.catchAllCause(program, (cause) =>
-  //   Effect.succeed({
-  //     pretty: Cause.pretty(cause), // string
-  //     failures: Cause.failures(cause), // Chunk<string>
-  //     defects: Cause.defects(cause) // Chunk<unknown>
-  //   }))
+  const allCauseEffect = Effect.catchAllCause(program, (cause) =>
+    Effect.succeed({
+      pretty: Cause.pretty(cause), // string
+      failures: Cause.failures(cause), // Chunk<string>
+      defects: Cause.defects(cause) // Chunk<unknown>
+    }))
 
-  // const allCause = Effect.runSync(allCauseEffect)
-  // console.log("all causes:", allCause)
+  const allCause = Effect.runSync(allCauseEffect)
+  console.log("all causes:", allCause)
 
-  // // // 3) 對 Cause 進行模式比對（按分支精準處理）
-  // // const cause = Cause.fail("boom")
-  // // //        ┌─── string
-  // // //        ▼
-  // // const analyzed = Cause.match(cause, {
-  // //   onEmpty: "Empty",
-  // //   onFail: (e) => `Fail(${String(e)})`,
-  // //   onDie: (d) => `Die(${String(d)})`,
-  // //   onInterrupt: (fiberId) => `Interrupt(${String(fiberId)})`,
-  // //   onSequential: (l, r) => `Sequential(${l} -> ${r})`,
-  // //   onParallel: (l, r) => `Parallel(${l} | ${r})`
-  // // })
-  // // console.log("analyzed:", analyzed)
-
-  // // Empty：沒有任何錯誤
-  // const empty = Cause.empty
-  // const label = Cause.match(empty, {
+  // // 3) 對 Cause 進行模式比對（按分支精準處理）
+  // const cause = Cause.fail("boom")
+  // //        ┌─── string
+  // //        ▼
+  // const analyzed = Cause.match(cause, {
   //   onEmpty: "Empty",
-  //   onFail: () => "Fail",
-  //   onDie: () => "Die",
-  //   onInterrupt: () => "Interrupt",
-  //   onSequential: () => "Sequential",
-  //   onParallel: () => "Parallel"
+  //   onFail: (e) => `Fail(${String(e)})`,
+  //   onDie: (d) => `Die(${String(d)})`,
+  //   onInterrupt: (fiberId) => `Interrupt(${String(fiberId)})`,
+  //   onSequential: (l, r) => `Sequential(${l} -> ${r})`,
+  //   onParallel: (l, r) => `Parallel(${l} | ${r})`
   // })
-  // console.log("empty:", label)
+  // console.log("analyzed:", analyzed)
 
-  // // Interrupt：超時情境（避免意外重試）
-  // // 模擬外部呼叫：需要 2 秒才會失敗
-  // const callPayment = Effect.delay(Effect.fail("gateway overloaded"), Duration.seconds(2))
+  // Empty：沒有任何錯誤
+  const empty = Cause.empty
+  const label = Cause.match(empty, {
+    onEmpty: "Empty",
+    onFail: () => "Fail",
+    onDie: () => "Die",
+    onInterrupt: () => "Interrupt",
+    onSequential: () => "Sequential",
+    onParallel: () => "Parallel"
+  })
+  console.log("empty:", label)
 
-  // // 加上 1 秒超時（逾時會產生 Interrupt）
-  // const withTimeout = Effect.timeout(callPayment, Duration.seconds(1))
+  // Interrupt：超時情境（避免意外重試）
+  // 模擬外部呼叫：需要 2 秒才會失敗
+  const callPayment = Effect.delay(Effect.fail("gateway overloaded"), Duration.seconds(2))
 
-  // // 只要是 Interrupt，我們回傳 504／不要重試；Fail 則可依商務決策重試
-  // const InterruptHandled = Effect.catchAllCause(withTimeout, (cause) =>
-  //   Effect.succeed(
-  //     Cause.match(cause, {
-  //       onInterrupt: () => ({ status: 504, message: "Payment Timeout" }),
-  //       onFail: (e) => ({ status: 400, message: String(e) }),
-  //       onDie: () => ({ status: 500, message: "Unexpected defect" }),
-  //       onEmpty: { status: 200, message: "OK" },
-  //       onSequential: (l, r) => ({ status: 500, message: `seq: ${l.message} -> ${r.message}` }),
-  //       onParallel: (l, r) => ({ status: 500, message: `par: ${l.message} | ${r.message}` })
-  //     })
-  //   ))
+  // 加上 1 秒超時（逾時會產生 Interrupt）
+  const withTimeout = Effect.timeout(callPayment, Duration.seconds(1))
 
-  // Effect.runPromise(InterruptHandled).then((result) => {
-  //   console.log("Interrupt Handled:", result)
-  // })
+  // 只要是 Interrupt，我們回傳 504／不要重試；Fail 則可依商務決策重試
+  const InterruptHandled = Effect.catchAllCause(withTimeout, (cause) =>
+    Effect.succeed(
+      Cause.match(cause, {
+        onInterrupt: () => ({ status: 504, message: "Payment Timeout" }),
+        onFail: (e) => ({ status: 400, message: String(e) }),
+        onDie: () => ({ status: 500, message: "Unexpected defect" }),
+        onEmpty: { status: 200, message: "OK" },
+        onSequential: (l, r) => ({ status: 500, message: `seq: ${l.message} -> ${r.message}` }),
+        onParallel: (l, r) => ({ status: 500, message: `par: ${l.message} | ${r.message}` })
+      })
+    ))
 
-  // // Parallel：並行批次（一次看見多個錯誤）
-  // // 同時呼叫多個後端（可能同時失敗）
-  // const userCall = Effect.fail("user: db unavailable")
-  // const ordersCall = Effect.die(new Error("orders: decoder bug"))
+  Effect.runPromise(InterruptHandled).then((result) => {
+    console.log("Interrupt Handled:", result)
+  })
 
-  // const parallelCalls = Effect.all([userCall, ordersCall], { concurrency: 2 })
+  // Parallel：並行批次（一次看見多個錯誤）
+  // 同時呼叫多個後端（可能同時失敗）
+  const userCall = Effect.fail("user: db unavailable")
+  const ordersCall = Effect.die(new Error("orders: decoder bug"))
 
-  // const report = Effect.catchAllCause(parallelCalls, (cause) =>
-  //   Effect.succeed({
-  //     failures: Array.from(Cause.failures(cause)),
-  //     defects: Array.from(Cause.defects(cause))
-  //   }))
+  const parallelCalls = Effect.all([userCall, ordersCall], { concurrency: 2 })
 
-  // // Effect.runPromiseExit(report).then(console.log)
+  const report = Effect.catchAllCause(parallelCalls, (cause) =>
+    Effect.succeed({
+      failures: Array.from(Cause.failures(cause)),
+      defects: Array.from(Cause.defects(cause))
+    }))
 
-  // // Sequential：順序補救也失敗
-  // // 先失敗 A，catch 後嘗試補救 B，但 B 也失敗 → Sequential(A -> B)
-  // const programSeq = Effect.failCause(
-  //   Cause.fail("Oh no!") // A
-  // ).pipe(
-  //   Effect.ensuring(Effect.failCause(Cause.die("Boom!"))) // B
-  // )
-  // Effect.runPromiseExit(programSeq).then(console.log)
+  // Effect.runPromiseExit(report).then(console.log)
+
+  // Sequential：順序補救也失敗
+  // 先失敗 A，catch 後嘗試補救 B，但 B 也失敗 → Sequential(A -> B)
+  const programSeq = Effect.failCause(
+    Cause.fail("Oh no!") // A
+  ).pipe(
+    Effect.ensuring(Effect.failCause(Cause.die("Boom!"))) // B
+  )
+  Effect.runPromiseExit(programSeq).then(console.log)
 }
 
 {
