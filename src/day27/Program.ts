@@ -47,7 +47,7 @@ function createUniqueUploadTempDirectory(baseTmpDir: string) {
 }
 
 // 清理暫存資料夾
-function cleanupTempBaseDirectoryEffect(baseTmpDir: string) {
+function cleanupTempBaseDirectory(baseTmpDir: string) {
   return Effect.tryPromise({
     try: async () => {
       await fs.rm(baseTmpDir, { recursive: true, force: true })
@@ -89,7 +89,7 @@ function useUploadWork(resource: UploadResource) {
 
 // 釋放資源
 function releaseUploadResource(resource: UploadResource) {
-  return Effect.ignore(cleanupTempBaseDirectoryEffect(path.join(resource.baseDir, "temp")))
+  return Effect.ignore(cleanupTempBaseDirectory(path.join(resource.baseDir, "temp")))
 }
 
 // 1) 先用 Effect.ensuring（總是執行收尾工作）
