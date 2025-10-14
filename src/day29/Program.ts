@@ -1,49 +1,49 @@
-import { Effect, Fiber } from "effect"
+import { Console, Effect, Fiber } from "effect"
 
-// function makeTask(name: string, delayMs: number, value: number) {
-//   return Effect.gen(function*() {
-//     yield* Console.log(`[${name}] start`)
-//     yield* Effect.sleep(`${delayMs} millis`)
-//     yield* Console.log(`[${name}] done`)
-//     return value
-//   })
-// }
+function makeTask(name: string, delayMs: number, value: number) {
+  return Effect.gen(function*() {
+    yield* Console.log(`[${name}] start`)
+    yield* Effect.sleep(`${delayMs} millis`)
+    yield* Console.log(`[${name}] done`)
+    return value
+  })
+}
 
-// const program = Effect.gen(function*() {
-//   // 1) fork：啟動子任務，立即回傳 Fiber 把手
-//   const fiberA = yield* Effect.fork(makeTask("A", 800, 1))
-//   const fiberB = yield* Effect.fork(makeTask("B", 1200, 2))
+const program = Effect.gen(function*() {
+  // 1) fork：啟動子任務，立即回傳 Fiber 把手
+  const fiberA = yield* Effect.fork(makeTask("A", 800, 1))
+  const fiberB = yield* Effect.fork(makeTask("B", 1200, 2))
 
-//   // 背景不斷提供 working 信號，幫助觀察
-//   const spinnerFiber = yield* Effect.fork(
-//     Effect.forever(
-//       Effect.sleep("200 millis").pipe(Effect.tap(() => Console.log("working...")))
-//     ).pipe(Effect.ensuring(Console.log("spinner cleanup")))
-//   )
+  // 背景不斷提供 working 信號，幫助觀察
+  const spinnerFiber = yield* Effect.fork(
+    Effect.forever(
+      Effect.sleep("200 millis").pipe(Effect.tap(() => Console.log("working...")))
+    ).pipe(Effect.ensuring(Console.log("spinner cleanup")))
+  )
 
-//   // 2) 在 join 之前，父流程可自由插入其他邏輯
-//   yield* Console.log("Parent doing other work")
-//   yield* Effect.sleep("500 millis")
-//   yield* Console.log("Parent done, now waiting for results")
+  // 2) 在 join 之前，父流程可自由插入其他邏輯
+  yield* Console.log("Parent doing other work")
+  yield* Effect.sleep("500 millis")
+  yield* Console.log("Parent done, now waiting for results")
 
-//   // 3) Fiber.join：阻塞等待成功值（錯誤會以失敗重新拋出）
-//   const a = yield* Fiber.join(fiberA)
-//   const exitA = yield* Fiber.await(fiberA)
-//   yield* Console.log(exitA)
-//   const b = yield* Fiber.join(fiberB)
-//   const exitB = yield* Fiber.await(fiberB)
-//   yield* Console.log(exitB)
+  // 3) Fiber.join：阻塞等待成功值（錯誤會以失敗重新拋出）
+  const a = yield* Fiber.join(fiberA)
+  const exitA = yield* Fiber.await(fiberA)
+  yield* Console.log(exitA)
+  const b = yield* Fiber.join(fiberB)
+  const exitB = yield* Fiber.await(fiberB)
+  yield* Console.log(exitB)
 
-//   // 4) 取得把手即可取消背景 spinner
-//   yield* Fiber.interrupt(spinnerFiber)
+  // 4) 取得把手即可取消背景 spinner
+  yield* Fiber.interrupt(spinnerFiber)
 
-//   const sum = a + b
-//   yield* Console.log(`sum: ${sum}`)
+  const sum = a + b
+  yield* Console.log(`sum: ${sum}`)
 
-//   return sum
-// })
+  return sum
+})
 
-// Effect.runFork(program)
+Effect.runFork(program)
 // 輸出：
 // Parent doing other work
 // [A] start
